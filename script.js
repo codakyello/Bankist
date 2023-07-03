@@ -74,7 +74,6 @@
 // BANKIST APP
 const account1 = {
   owner: 'Jonas Schmedtmann',
-  balance: 250000,
   movements: [],
   interestRate: 1.2,
   pin: 1111,
@@ -82,7 +81,6 @@ const account1 = {
 
 const account2 = {
   owner: 'Jessica Davis',
-  balance: 139000,
   movements: [],
   interestRate: 1.5,
   pin: 2222,
@@ -90,7 +88,6 @@ const account2 = {
 
 const account3 = {
   owner: 'Steven Thomas Williams',
-  balance: 1240000,
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
@@ -98,7 +95,6 @@ const account3 = {
 
 const account4 = {
   owner: 'Sarah Smith',
-  balance: 640000,
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
@@ -129,24 +125,23 @@ const inputTransferTo = document.querySelector('.form__input--to');
 let currentUser = '';
 const accounts = [account1, account2, account3, account4];
 
-const computeUsername = function (account) {
-  const accountName = account.owner;
-  const userName = accountName
-    .toLowerCase()
-    .split(' ')
-    .map(name => name[0]);
-  account.userName = userName.join('');
+const computeUsername = function () {
+  accounts.forEach(function (account) {
+    const userName = account.owner
+      .toLowerCase()
+      .split(' ')
+      .map(name => name[0]);
+    account.userName = userName.join('');
+  });
 };
-
+computeUsername();
 const login = function (userName, pin) {
   currentUser = '';
   for (const account of accounts) {
-    computeUsername(account);
     if (account.userName === userName) {
       if (account.pin === pin) {
         currentUser = account;
         updateUI();
-        // Compute username
         return;
       } else {
         alert('Incorrect pin');
@@ -165,18 +160,19 @@ const login = function (userName, pin) {
 const updateUI = function () {
   getElement('.app').style.opacity = '1';
   labelWelcome.textContent = `Good Evening ${currentUser.owner}`;
+  currentUser.balance = currentUser.movements.reduce(
+    (acc, cur) => acc + Number(cur),
+    0
+  );
+  console.log(currentUser.balance);
   labelBalance.textContent = '₦' + currentUser.balance;
-  let moneyIn = 0;
-  let moneyOut = 0;
-  currentUser.movements.forEach(function (movement) {
-    if (Math.sign(movement) === -1) {
-      moneyOut += Number(Math.abs(movement));
-    } else {
-      moneyIn += Number(movement);
-    }
-  });
-  labelSumIn.textContent = moneyIn;
-  labelSumOut.textContent = moneyOut;
+  const deposits = currentUser.movements.filter(transaction => transaction > 0);
+  const withdrawals = currentUser.movements.filter(
+    transaction => transaction < 0
+  );
+
+  labelSumIn.textContent = deposits.reduce((acc, cur) => acc + cur, 0);
+  labelSumOut.textContent = withdrawals.reduce((acc, cur) => acc + cur, 0);
 
   // Display movements
   movementsEl.innerHTML = '';
@@ -195,7 +191,6 @@ const requestLoan = function (evt) {
   evt.preventDefault();
   const loan = inputLoanAmount.value;
   if (loan) {
-    currentUser.balance += Number(loan);
     currentUser.movements.push(loan);
     // Transaction successful update Ui
     inputLoanAmount.value = '';
@@ -215,9 +210,7 @@ const transfer = function (evt) {
       return;
     } else if (receiverAccount.userName === receiver) {
       if (amount > 0 && currentUser.balance > amount) {
-        receiverAccount.balance += amount;
         receiverAccount.movements.push(amount);
-        currentUser.balance -= amount;
         currentUser.movements.push(-amount);
         inputTransferAmount.value = '';
         receiverAccEl.value = '';
