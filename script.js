@@ -161,7 +161,7 @@ const updateUI = function () {
   getElement('.app').style.opacity = '1';
   labelWelcome.textContent = `Good Evening ${currentUser.owner}`;
   currentUser.balance = currentUser.movements.reduce(
-    (acc, cur) => acc + Number(cur),
+    (acc, cur) => acc + cur,
     0
   );
   console.log(currentUser.balance);
@@ -189,7 +189,7 @@ const updateUI = function () {
 };
 const requestLoan = function (evt) {
   evt.preventDefault();
-  const loan = inputLoanAmount.value;
+  const loan = Number(inputLoanAmount.value);
   if (loan) {
     currentUser.movements.push(loan);
     // Transaction successful update Ui
