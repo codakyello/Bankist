@@ -36,30 +36,30 @@
 // const accounts = [account1, account2, account3, account4];
 
 // // Elements
-// const labelWelcome = document.querySelector('.welcome');
-// const labelDate = document.querySelector('.date');
-// const labelBalance = document.querySelector('.balance__value');
-// const labelSumIn = document.querySelector('.summary__value--in');
-// const labelSumOut = document.querySelector('.summary__value--out');
-// const labelSumInterest = document.querySelector('.summary__value--interest');
-// const labelTimer = document.querySelector('.timer');
+// const labelWelcome = getElement('.welcome');
+// const labelDate = getElement('.date');
+// const labelBalance = getElement('.balance__value');
+// const labelSumIn = getElement('.summary__value--in');
+// const labelSumOut = getElement('.summary__value--out');
+// const labelSumInterest = getElement('.summary__value--interest');
+// const labelTimer = getElement('.timer');
 
-// const containerApp = document.querySelector('.app');
-// const containerMovements = document.querySelector('.movements');
+// const containerApp = getElement('.app');
+// const containerMovements = getElement('.movements');
 
-// const btnLogin = document.querySelector('.login__btn');
-// const btnTransfer = document.querySelector('.form__btn--transfer');
-// const btnLoan = document.querySelector('.form__btn--loan');
-// const btnClose = document.querySelector('.form__btn--close');
-// const btnSort = document.querySelector('.btn--sort');
+// const btnLogin = getElement('.login__btn');
+// const btnTransfer = getElement('.form__btn--transfer');
+// const btnLoan = getElement('.form__btn--loan');
+// const btnClose = getElement('.form__btn--close');
+// const btnSort = getElement('.btn--sort');
 
-// const inputLoginUsername = document.querySelector('.login__input--user');
-// const inputLoginPin = document.querySelector('.login__input--pin');
-// const inputinputTransferTo = document.querySelector('.form__input--to');
-// const inputTransferAmount = document.querySelector('.form__input--amount');
-// const inputLoanAmount = document.querySelector('.form__input--loan-amount');
-// const inputCloseUsername = document.querySelector('.form__input--user');
-// const inputClosePin = document.querySelector('.form__input--pin');
+// const inputLoginUsername = getElement('.login__input--user');
+// const inputLoginPin = getElement('.login__input--pin');
+// const inputinputTransferTo = getElement('.form__input--to');
+// const inputTransferAmount = getElement('.form__input--amount');
+// const inputLoanAmount = getElement('.form__input--loan-amount');
+// const inputCloseUsername = getElement('.form__input--user');
+// const inputClosePin = getElement('.form__input--pin');
 
 // /////////////////////////////////////////////////
 // /////////////////////////////////////////////////
@@ -103,24 +103,24 @@ const account4 = {
 const getElement = selector => document.querySelector(selector);
 
 //LABELS
-const labelWelcome = document.querySelector('.welcome');
-const labelBalance = document.querySelector('.balance__value');
-const labelSumIn = document.querySelector('.summary__value--in');
-const labelSumOut = document.querySelector('.summary__value--out');
-const labelSumInterest = document.querySelector('.summary__value--interest');
+const labelWelcome = getElement('.welcome');
+const labelBalance = getElement('.balance__value');
+const labelSumIn = getElement('.summary__value--in');
+const labelSumOut = getElement('.summary__value--out');
+const labelSumInterest = getElement('.summary__value--interest');
 
 // Button
 const btnLogin = getElement('.login__btn');
-const btnTransfer = document.querySelector('.form__btn--transfer');
-const btnLoan = document.querySelector('.form__btn--loan');
-const btnSort = document.querySelector('.btn--sort');
+const btnTransfer = getElement('.form__btn--transfer');
+const btnLoan = getElement('.form__btn--loan');
+const btnSort = getElement('.btn--sort');
 // ELEMENT
 const userEl = getElement('.login__input--user');
 const pinEl = getElement('.login__input--pin');
 const movementsEl = getElement('.movements');
 const inputLoanAmount = getElement('.form__input--loan-amount');
-const inputTransferAmount = document.querySelector('.form__input--amount');
-const inputTransferTo = document.querySelector('.form__input--to');
+const inputTransferAmount = getElement('.form__input--amount');
+const inputTransferTo = getElement('.form__input--to');
 
 //VARIABLES
 let currentUser = '';
@@ -263,8 +263,6 @@ const sortArray = function () {
       if (b > a) return -1;
     });
   }
-
-  console.log(currentUser.movements);
   isSorted = !isSorted;
 };
 
@@ -274,7 +272,16 @@ btnSort.addEventListener('click', function (e) {
   updateUI();
 });
 
-//
+// const capitalize = str => str[0].toUpperCase() + str.slice(1);
+// const convertTitleCase = function (title) {
+//   const exceptions = ['a', 'an', 'and', 'the', 'but', 'or', 'on', 'in', 'with'];
+//   return capitalize(
+//     title
+//       .toLowerCase()
+//       .split(' ')
+//       .map(word => (!exceptions.includes(word) ? capitalize(word) : word))
+//       .join(' ')
+//   );
+// };
 
-// When i click sort i want to arrange in descending order from big to small
-// Transform the list to ascending first then let the frontend add from top to bottom
+// console.log(convertTitleCase('and this is also LONG nice title'));
