@@ -55,7 +55,7 @@
 
 // const inputLoginUsername = document.querySelector('.login__input--user');
 // const inputLoginPin = document.querySelector('.login__input--pin');
-// const inputTransferTo = document.querySelector('.form__input--to');
+// const inputinputTransferTo = document.querySelector('.form__input--to');
 // const inputTransferAmount = document.querySelector('.form__input--amount');
 // const inputLoanAmount = document.querySelector('.form__input--loan-amount');
 // const inputCloseUsername = document.querySelector('.form__input--user');
@@ -73,28 +73,28 @@
 
 // BANKIST APP
 const account1 = {
-  owner: 'Jonas Schmedtmann',
-  movements: [],
+  owner: 'Olaoluwa Thompson',
+  movements: [200, -200, 340, -300, -20, 460],
   interestRate: 1.2,
   pin: 1111,
 };
 
 const account2 = {
-  owner: 'Jessica Davis',
-  movements: [],
+  owner: 'Graceey Thompson',
+  movements: [200, 50, 400, -460],
   interestRate: 1.5,
   pin: 2222,
 };
 
 const account3 = {
-  owner: 'Steven Thomas Williams',
+  owner: 'Femmy Thomas',
   movements: [200, -200, 340, -300, -20, 50, 400, -460],
   interestRate: 0.7,
   pin: 3333,
 };
 
 const account4 = {
-  owner: 'Sarah Smith',
+  owner: 'Vikky Thompson',
   movements: [430, 1000, 700, 50, 90],
   interestRate: 1,
   pin: 4444,
@@ -107,12 +107,13 @@ const labelWelcome = document.querySelector('.welcome');
 const labelBalance = document.querySelector('.balance__value');
 const labelSumIn = document.querySelector('.summary__value--in');
 const labelSumOut = document.querySelector('.summary__value--out');
+const labelSumInterest = document.querySelector('.summary__value--interest');
 
 // Button
 const btnLogin = getElement('.login__btn');
 const btnTransfer = document.querySelector('.form__btn--transfer');
 const btnLoan = document.querySelector('.form__btn--loan');
-
+const btnSort = document.querySelector('.btn--sort');
 // ELEMENT
 const userEl = getElement('.login__input--user');
 const pinEl = getElement('.login__input--pin');
@@ -125,7 +126,7 @@ const inputTransferTo = document.querySelector('.form__input--to');
 let currentUser = '';
 const accounts = [account1, account2, account3, account4];
 
-const computeUsername = function () {
+const createUsername = function () {
   accounts.forEach(function (account) {
     const userName = account.owner
       .toLowerCase()
@@ -134,45 +135,56 @@ const computeUsername = function () {
     account.userName = userName.join('');
   });
 };
-computeUsername();
-const login = function (userName, pin) {
+createUsername();
+const login = function () {
+  const userName = userEl.value.toLowerCase();
+  const pin = Number(pinEl.value);
   currentUser = '';
-  for (const account of accounts) {
-    if (account.userName === userName) {
-      if (account.pin === pin) {
-        currentUser = account;
-        updateUI();
-        return;
-      } else {
-        alert('Incorrect pin');
-        //'Incorrect pin');
-        return;
-      }
-    }
-  }
+  currentUser = accounts.find(account => {
+    return account.userName === userName;
+  });
+
   if (!currentUser) {
-    alert('No User Found');
+    alert('No user Found');
     getElement('.app').style.opacity = '0';
-    // Off ui
+    return;
+  } else {
+    if (pin === currentUser.pin) {
+      labelWelcome.textContent = `Good Evening ${currentUser.owner}`;
+      userEl.value = pinEl.value = '';
+      pinEl.blur();
+      userEl.blur();
+      updateUI();
+    } else {
+      alert('Incorrect pin');
+      getElement('.app').style.opacity = '0';
+    }
   }
 };
 
 const updateUI = function () {
   getElement('.app').style.opacity = '1';
-  labelWelcome.textContent = `Good Evening ${currentUser.owner}`;
+
   currentUser.balance = currentUser.movements.reduce(
     (acc, cur) => acc + cur,
     0
   );
-  console.log(currentUser.balance);
   labelBalance.textContent = '₦' + currentUser.balance;
-  const deposits = currentUser.movements.filter(transaction => transaction > 0);
-  const withdrawals = currentUser.movements.filter(
-    transaction => transaction < 0
-  );
+  const totalDeposit = currentUser.movements
+    .filter(transaction => transaction > 0)
+    .reduce((acc, cur) => acc + cur, 0);
+  const totalWithdrawal = currentUser.movements
+    .filter(transaction => transaction < 0)
+    .reduce((acc, cur) => acc + cur, 0);
+  const interest = currentUser.movements
+    .filter(transaction => transaction > 0)
+    .map(transaction => (transaction * currentUser.interestRate) / 100)
+    .filter(interest => interest >= 1)
+    .reduce((acc, interest) => acc + interest, 0);
 
-  labelSumIn.textContent = deposits.reduce((acc, cur) => acc + cur, 0);
-  labelSumOut.textContent = withdrawals.reduce((acc, cur) => acc + cur, 0);
+  labelSumInterest.textContent = `₦${interest.toFixed(2)}`;
+  labelSumIn.textContent = `₦${totalDeposit}`;
+  labelSumOut.textContent = `₦${Math.abs(totalWithdrawal)}`;
 
   // Display movements
   movementsEl.innerHTML = '';
@@ -187,33 +199,45 @@ const updateUI = function () {
     movementsEl.insertAdjacentHTML('afterbegin', transRow);
   });
 };
-const requestLoan = function (evt) {
+
+btnLogin.addEventListener('click', function (evt) {
+  evt.preventDefault();
+  login();
+});
+
+btnLoan.addEventListener('click', function (evt) {
   evt.preventDefault();
   const loan = Number(inputLoanAmount.value);
-  if (loan) {
+  if (loan > 0 && currentUser.movements.some(trans => trans >= loan * 0.1)) {
     currentUser.movements.push(loan);
     // Transaction successful update Ui
     inputLoanAmount.value = '';
     updateUI();
+    return;
   }
-};
+  alert('Your Loan Request was not Approved');
+});
 
-const transfer = function (evt) {
+btnTransfer.addEventListener('click', function (evt) {
   evt.preventDefault();
-  const receiverAccEl = inputTransferTo;
-  const receiver = receiverAccEl.value.toLowerCase();
+  const inputTransferToEl = inputTransferTo;
+  const inputTransfer = inputTransferToEl.value.toLowerCase();
   const amount = Number(inputTransferAmount.value);
   //
-  for (const receiverAccount of accounts) {
-    if (receiver === currentUser.userName) {
+
+  const receiverAcc = accounts.find(
+    account => account.userName === inputTransfer
+  );
+  if (receiverAcc) {
+    if (receiverAcc.userName === currentUser.userName) {
       alert('You cannot transfer money to yourself');
       return;
-    } else if (receiverAccount.userName === receiver) {
-      if (amount > 0 && currentUser.balance > amount) {
-        receiverAccount.movements.push(amount);
+    } else {
+      if (amount > 0 && currentUser.balance >= amount) {
+        receiverAcc.movements.push(amount);
         currentUser.movements.push(-amount);
         inputTransferAmount.value = '';
-        receiverAccEl.value = '';
+        inputTransferToEl.value = '';
         updateUI();
         //currentUser.movements);
         return;
@@ -223,19 +247,34 @@ const transfer = function (evt) {
     }
   }
   alert('User does not exist');
-};
-
-btnLogin.addEventListener('click', function (evt) {
-  evt.preventDefault();
-  const userName = userEl.value.toLowerCase();
-  const pin = Number(pinEl.value);
-  login(userName, pin);
 });
 
-btnLoan.addEventListener('click', requestLoan);
+let isSorted = false;
+let defaultOrder;
+const sortArray = function () {
+  if (isSorted == true) {
+    console.log('Sorted');
+    currentUser.movements = defaultOrder;
+  } else {
+    defaultOrder = currentUser.movements.map(trans => trans);
+    console.log(defaultOrder);
+    currentUser.movements.sort((a, b) => {
+      if (a > b) return 1;
+      if (b > a) return -1;
+    });
+  }
 
-btnTransfer.addEventListener('click', transfer);
-// Loop through the accounts and check if the user exist only then should you check if the password matches
+  console.log(currentUser.movements);
+  isSorted = !isSorted;
+};
 
-/////////////////////////////////////////////////
-// Starting App
+btnSort.addEventListener('click', function (e) {
+  console.log('clicked');
+  sortArray();
+  updateUI();
+});
+
+//
+
+// When i click sort i want to arrange in descending order from big to small
+// Transform the list to ascending first then let the frontend add from top to bottom
